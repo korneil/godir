@@ -63,8 +63,19 @@ Given the following shell functions:
 
     c(){ cd `godir $@` }
 
-    cdp(){ cd `godir ~/Projects $@` }   
+    # cd to dir in ~/Projects
+    cdp(){ cd `godir ~/Projects $@` }
+    
+    # active python environment
+    pe(){ source `godir ~/.venv $@`/bin/activate; }
+    
+    # create python environment
+    cpe(){ virtualenv -p python ~/.venv/$@; }
 
     cdol(){ cd `godir /opt/local $@` }
 
 `cdol e` in the shell will cd to `/opt/local/include`.
+
+`cpe new_python_env; pe new.p` will create and activate a new
+python virtual env. After creation (`cpe`), `pe n` will activate
+it.
