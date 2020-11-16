@@ -92,7 +92,7 @@ func main() {
 	var r string
 	switch len(dirs) {
 	case 0:
-		os.Exit(-1)
+		r = "."
 	case 1:
 		r = dirs[0]
 	default:
