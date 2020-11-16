@@ -19,7 +19,8 @@ arguments.
 # Install
 
 Install the binary:
-
+    
+    go get -u github.com/korneil/godir
     go install github.com/korneil/godir
     
 Add functions to your shell initialization, e.g. to `.bashrc`/`.profile`/`.zshrc` 
