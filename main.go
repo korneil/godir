@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"regexp"
 	"sort"
 	"strconv"
+
+	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
-func parseArgs(args []string) (root string, patterns []*regexp.Regexp) {
+func parseArgs(args []string) (root string, patterns []string) {
 	var i, j, l int
 
-	patterns = make([]*regexp.Regexp, 0)
+	patterns = make([]string, 0)
 	for _, p := range args {
 		if path.IsAbs(p) {
 			root = p
+			patterns = patterns[:0]
 			continue
 		}
 
@@ -23,16 +25,10 @@ func parseArgs(args []string) (root string, patterns []*regexp.Regexp) {
 		for i = 0; i < l; i++ {
 			for j = i; j < l && p[j] != os.PathSeparator; j++ {
 			}
-			if j-i == 0 {
-				continue
+			if j != i {
+				patterns = append(patterns, p[i:j])
+				i = j
 			}
-			re, err := regexp.Compile(p[i:j])
-			if err != nil {
-				println(err)
-				os.Exit(-1)
-			}
-			patterns = append(patterns, re)
-			i = j
 		}
 	}
 
@@ -48,12 +44,12 @@ func parseArgs(args []string) (root string, patterns []*regexp.Regexp) {
 	return
 }
 
-func walk(root string, patterns []*regexp.Regexp) []string {
+func walk(root string, patterns []string) []string {
 	dirs := make([]string, 1)
 	dirs[0] = root
 	t := make([]string, 0, 1)
 
-	for _, re := range patterns {
+	for _, p := range patterns {
 		t = t[:0]
 		t = append(t, dirs...)
 		dirs = dirs[:0]
@@ -61,10 +57,12 @@ func walk(root string, patterns []*regexp.Regexp) []string {
 		for _, s := range t {
 			if f, err := os.Open(s); err == nil {
 				if names, err := f.Readdirnames(-1); err == nil {
-					for i := range names {
-						if re.Match([]byte(names[i])) {
-							dirs = append(dirs, path.Join(s, names[i]))
-						}
+					r := fuzzy.RankFindNormalizedFold(p, names)
+					sort.Slice(r, func(i, j int) bool {
+						return r[i].Distance < r[j].Distance || (r[i].Distance == r[j].Distance && r[i].OriginalIndex >= r[j].OriginalIndex)
+					})
+					for i := range r {
+						dirs = append(dirs, path.Join(s, r[i].Target))
 					}
 				}
 				_ = f.Close()
@@ -96,7 +94,6 @@ func main() {
 	case 1:
 		r = dirs[0]
 	default:
-		sort.Strings(dirs)
 		for i, dir := range dirs {
 			println(strconv.Itoa(i) + ": " + dir)
 		}

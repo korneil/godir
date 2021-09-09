@@ -1,13 +1,12 @@
 package main
 
 import (
-	"regexp"
 	"testing"
 )
 
 var (
 	root     string
-	patterns []*regexp.Regexp
+	patterns []string
 	args     = []string{"/opt/local", "e"}
 )
 

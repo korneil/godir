@@ -1,29 +1,30 @@
 # Preface
 
-`godir` is a small util that walks through directories and finds 
+`godir` is a small util that walks through directories and finds
 matches based on arguments. If there is only one match, it prints the
 match to `stdout`, otherwise prints a list of matched directories
-to `stderr` and lets the user select one.
+to `stderr` sorted by the and lets the user select one.
 
-It is useful for quick navigation when used in combination with the 
+It is useful for quick navigation when used in combination with the
 shell.
 
-Arguments are either absolute paths or regular expressions.
+Arguments are either absolute paths or string expressions.
 If an absolute path is encountered, directory traversal starts
-from that directory, otherwise it is treated as a regular expression.
-If no absolute path is provided, start directory for search is the 
-current directory. If an argument is not an absolute path and 
+from that directory, otherwise it is treated as a regular string,
+and a fuzzy match is performed against subdirectories.
+If no absolute path is provided, start directory for search is the
+current directory. If an argument is not an absolute path and
 contains path separator (e.g. `/`), it is split to multiple
 arguments.
 
 # Install
 
 Install the binary:
-    
+
     go get -u github.com/korneil/godir
     go install github.com/korneil/godir
-    
-Add functions to your shell initialization, e.g. to `.bashrc`/`.profile`/`.zshrc` 
+
+Add functions to your shell initialization, e.g. to `.bashrc`/`.profile`/`.zshrc`
 (see **Shell examples** for example functions).
 
 # Example
@@ -51,10 +52,10 @@ Or `godir /opt/local e` (or `cd /opt/local; godir e`) gives the following output
 
     0: /opt/local/etc
     1: /opt/local/include
-    2: /opt/local/libexec    
-    
+    2: /opt/local/libexec
+
 After selecting `1`, output on `stdout`:
-    
+
     /opt/local/include
 
 # Shell example
@@ -65,10 +66,10 @@ Given the following shell functions:
 
     # cd to dir in ~/Projects
     cdp(){ cd `godir ~/Projects $@` }
-    
+
     # active python environment
     pe(){ source `godir ~/.venv $@`/bin/activate; }
-    
+
     # create python environment
     cpe(){ virtualenv -p python ~/.venv/$@; }
 
@@ -76,6 +77,6 @@ Given the following shell functions:
 
 `cdol e` in the shell will cd to `/opt/local/include`.
 
-`cpe new_python_env; pe new.p` will create and activate a new
+`cpe new_python_env; pe newp` will create and activate a new
 python virtual env. After creation (`cpe`), `pe n` will activate
 it.
